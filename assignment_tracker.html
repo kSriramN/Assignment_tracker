@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Assignment Tracker</title>
+<style>
+:root{color-scheme:light;--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#687386;--line:#e6eaf1;--accent:#3659d9;--green:#16845b;--orange:#b66b13;--red:#c44747}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1120px;margin:auto;padding:28px 18px 48px}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+h1{font-size:28px;margin:0 0 5px;letter-spacing:-.5px}.sub{color:var(--muted);margin:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap}button,.filebtn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 13px;border-radius:10px;font:inherit;cursor:pointer}button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}button:hover,.filebtn:hover{filter:brightness(.97)}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:24px 0}.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:16px}.label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}.value{font-size:27px;font-weight:700;margin-top:5px}.hint{font-size:12px;color:var(--muted);margin-top:2px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:14px}.panelhead{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}h2{font-size:17px;margin:0}.progressrow{display:grid;grid-template-columns:115px 1fr 75px;gap:12px;align-items:center;margin-top:15px}.track{height:10px;background:#edf0f6;border-radius:99px;overflow:hidden}.fill{height:100%;background:var(--accent);border-radius:99px}.fill.other{background:#18a078}.small{font-size:13px;color:var(--muted)}
+.tablewrap{overflow-x:auto;margin-top:14px}table{border-collapse:collapse;width:100%;min-width:780px}th{text-align:left;color:var(--muted);font-size:12px;font-weight:600;padding:10px 9px;border-bottom:1px solid var(--line)}td{padding:10px 9px;border-bottom:1px solid var(--line);vertical-align:middle}tr:last-child td{border-bottom:0}
+input{font:inherit;color:inherit;border:1px solid var(--line);border-radius:8px;padding:8px;background:#fff;min-width:0;width:100%}input:focus{outline:2px solid #cbd5ff;border-color:var(--accent)}.date{width:145px}.day{width:75px}.topic{min-width:230px}.score{width:88px;text-align:center}.remaining{font-weight:650;white-space:nowrap}.warn{color:var(--red);font-size:12px}.ok{color:var(--green)}.delete{color:var(--red);padding:6px 9px}
+.footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}.legend{font-size:12px;color:var(--muted)}.filebtn input{display:none}
+@media(max-width:720px){main{padding:20px 12px 36px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.value{font-size:23px}.panel{padding:14px}.progressrow{grid-template-columns:88px 1fr 65px;gap:8px}}
+</style>
+</head>
+<body><main>
+<header class="top"><div><h1>Assignment Tracker</h1><p class="sub">Track completion, remaining problems and days since each session.</p></div>
+<div class="actions"><button id="export">Export CSV</button><label class="filebtn">Import CSV<input id="import" type="file" accept=".csv,text/csv"></label><button class="primary" id="add">＋ Add assignment</button></div></header>
+<section class="cards">
+ <div class="card"><div class="label">Overall completion</div><div class="value" id="overall">—</div><div class="hint" id="overallHint">Across both columns</div></div>
+ <div class="card"><div class="label">Assignment remaining</div><div class="value" id="aRemain">—</div><div class="hint" id="aTotal">Problems left</div></div>
+ <div class="card"><div class="label">Other remaining</div><div class="value" id="oRemain">—</div><div class="hint" id="oTotal">Problems left</div></div>
+ <div class="card"><div class="label">Study days logged</div><div class="value" id="days">—</div><div class="hint" id="elapsed">Elapsed since first date</div></div>
+</section>
+<section class="panel"><div class="panelhead"><h2>Completion by category</h2><span class="small">Completed / total problems</span></div>
+ <div class="progressrow"><strong>Assignment</strong><div class="track"><div class="fill" id="aBar"></div></div><span class="small" id="aPct">—</span></div>
+ <div class="progressrow"><strong>Other</strong><div class="track"><div class="fill other" id="oBar"></div></div><span class="small" id="oPct">—</span></div>
+</section>
+<section class="panel"><div class="panelhead"><h2>Your assignments</h2><span class="small">Edit the two score fields as you make progress. Format: completed/total (e.g. 7/10).</span></div>
+<div class="tablewrap"><table><thead><tr><th>Day</th><th>Date</th><th>Topic</th><th>Assignment</th><th>Other</th><th>Days ago</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="footer"><span class="legend">Days ago is calculated from each row's date. Data is saved automatically in this browser.</span><span class="small" id="saved">All changes saved locally</span></div>
+</section>
+</main>
+<script>
+const initial=[
+ {day:"Day 6",date:"2026-10-19",topic:"GROUP BY Metrics",assignment:"7/10",other:"0/10"},
+ {day:"Day 9",date:"2026-10-26",topic:"CASE WHEN and Conditional Aggregation",assignment:"10/10",other:"0/10"},
+ {day:"Day 10",date:"2026-10-28",topic:"JOINs 1: Relationships + INNER JOIN",assignment:"10/10",other:"2/10"},
+ {day:"Day 11",date:"2026-10-30",topic:"JOINs 2: LEFT + FULL OUTER + CROSS",assignment:"10/10",other:"01/0"},
+ {day:"Day 13",date:"2026-11-02",topic:"JOINs 3: SELF JOIN + NON-EQUI JOINS",assignment:"0/8",other:"0/12"},
+ {day:"Day 14",date:"2026-11-04",topic:"Subqueries 1: Non-Correlated",assignment:"0/10",other:"0/10"},
+ {day:"Day 15",date:"2026-11-06",topic:"Subqueries 2: Correlated + EXISTS",assignment:"0/10",other:"0/10"}
+];
+let data;try{data=JSON.parse(localStorage.getItem("assignmentTracker_v1"))||initial}catch{data=initial}
+const parse=s=>{const m=String(s).trim().match(/^(\d+)\s*\/\s*(\d+)$/);if(!m)return null;const done=+m[1],total=+m[2];if(total<1||done>total)return null;return{done,total,left:total-done}};
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function save(){localStorage.setItem("assignmentTracker_v1",JSON.stringify(data));document.getElementById("saved").textContent="Saved just now";render()}
+function daysAgo(date){if(!date)return "—";const a=new Date(date+"T00:00:00"),b=new Date();return Number.isNaN(+a)?"—":Math.floor((new Date(b.getFullYear(),b.getMonth(),b.getDate())-a)/86400000)}
+function render(){
+ const body=document.getElementById("rows");body.innerHTML="";
+ data.forEach((r,i)=>{const tr=document.createElement("tr");const pa=parse(r.assignment),po=parse(r.other);
+ tr.innerHTML=`<td><input class="day" aria-label="Day" value="${esc(r.day)}" data-i="${i}" data-k="day"></td><td><input class="date" type="date" aria-label="Date" value="${esc(r.date)}" data-i="${i}" data-k="date"></td><td><input class="topic" aria-label="Topic" value="${esc(r.topic)}" data-i="${i}" data-k="topic"></td><td><input class="score" aria-label="Assignment completed/total" value="${esc(r.assignment)}" data-i="${i}" data-k="assignment"></td><td><input class="score" aria-label="Other completed/total" value="${esc(r.other)}" data-i="${i}" data-k="other"></td><td class="remaining">${daysAgo(r.date)} days</td><td><button class="delete" data-delete="${i}" title="Delete row">✕</button></td>`;
+ if(!pa||!po){const bad=!pa?"Assignment":"Other";const cell=tr.children[!pa?3:4];cell.insertAdjacentHTML("beforeend",`<div class="warn">Check format</div>`)}
+ body.appendChild(tr)});
+ const a=data.map(x=>parse(x.assignment)).filter(Boolean),o=data.map(x=>parse(x.other)).filter(Boolean);
+ const sum=arr=>arr.reduce((s,x)=>({done:s.done+x.done,total:s.total+x.total,left:s.left+x.left}),{done:0,total:0,left:0});
+ const A=sum(a),O=sum(o),T={done:A.done+O.done,total:A.total+O.total,left:A.left+O.left};
+ const pct=x=>x.total?Math.round(x.done/x.total*100):0;
+ document.getElementById("overall").textContent=T.total?pct(T)+"%":"—";document.getElementById("overallHint").textContent=`${T.done} completed of ${T.total} valid problems`;
+ document.getElementById("aRemain").textContent=A.left;document.getElementById("aTotal").textContent=`${A.done} completed · ${A.total} total`;
+ document.getElementById("oRemain").textContent=O.left;document.getElementById("oTotal").textContent=`${O.done} completed · ${O.total} total`;
+ document.getElementById("days").textContent=data.length;const dates=data.map(x=>x.date).filter(Boolean).sort();document.getElementById("elapsed").textContent=dates.length?`${Math.max(0,daysAgo(dates[0]))} days since first date`:"No dates entered";
+ document.getElementById("aBar").style.width=pct(A)+"%";document.getElementById("oBar").style.width=pct(O)+"%";document.getElementById("aPct").textContent=pct(A)+"%";document.getElementById("oPct").textContent=pct(O)+"%";
+}
+document.getElementById("rows").addEventListener("change",e=>{const t=e.target;if(t.dataset.i===undefined)return;data[+t.dataset.i][t.dataset.k]=t.value;save()});
+document.getElementById("rows").addEventListener("click",e=>{if(e.target.dataset.delete!==undefined){data.splice(+e.target.dataset.delete,1);save()}});
+document.getElementById("add").onclick=()=>{data.push({day:"Day "+(data.length?data.length+1:1),date:new Date().toISOString().slice(0,10),topic:"New topic",assignment:"0/0",other:"0/0"});save();document.querySelector("#rows tr:last-child input[data-k=topic]").focus()};
+document.getElementById("export").onclick=()=>{const cols=["Day","Date","Topic","Assignment","Other"];const csv=[cols,...data.map(r=>[r.day,r.date,r.topic,r.assignment,r.other])].map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="assignment-tracker.csv";a.click();URL.revokeObjectURL(a.href)};
+document.getElementById("import").onchange=async e=>{const f=e.target.files[0];if(!f)return;const lines=(await f.text()).trim().split(/\r?\n/);const vals=lines.slice(1).map(line=>{const out=[];let cur="",q=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'&&line[i+1]==='"'){cur+='"';i++}else if(c==='"')q=!q;else if(c===","&&!q){out.push(cur);cur=""}else cur+=c}out.push(cur);return out}).filter(x=>x.length>=5);data=vals.map(x=>({day:x[0],date:x[1],topic:x[2],assignment:x[3],other:x[4]}));save();e.target.value=""};
+render();
+</script></body></html>
