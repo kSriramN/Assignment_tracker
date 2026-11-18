@@ -38,13 +38,13 @@ input{font:inherit;color:inherit;border:1px solid var(--line);border-radius:8px;
 </main>
 <script>
 const initial=[
- {day:"Day 6",date:"2026-10-19",topic:"GROUP BY Metrics",assignment:"7/10",other:"0/10"},
+ {day:"Day 6",date:"2026-10-19",topic:"GROUP BY Metrics",assignment:"10/10",other:"10/10"},
  {day:"Day 9",date:"2026-10-26",topic:"CASE WHEN and Conditional Aggregation",assignment:"10/10",other:"0/10"},
  {day:"Day 10",date:"2026-10-28",topic:"JOINs 1: Relationships + INNER JOIN",assignment:"10/10",other:"2/10"},
- {day:"Day 11",date:"2026-10-30",topic:"JOINs 2: LEFT + FULL OUTER + CROSS",assignment:"10/10",other:"01/0"},
- {day:"Day 13",date:"2026-11-02",topic:"JOINs 3: SELF JOIN + NON-EQUI JOINS",assignment:"0/8",other:"0/12"},
- {day:"Day 14",date:"2026-11-04",topic:"Subqueries 1: Non-Correlated",assignment:"0/10",other:"0/10"},
- {day:"Day 15",date:"2026-11-06",topic:"Subqueries 2: Correlated + EXISTS",assignment:"0/10",other:"0/10"}
+ {day:"Day 11",date:"2026-10-30",topic:"JOINs 2: LEFT + FULL OUTER + CROSS",assignment:"10/10",other:"01/10"},
+ {day:"Day 13",date:"2026-11-02",topic:"JOINs 3: SELF JOIN + NON-EQUI JOINS",assignment:"8/8",other:"0/12"},
+ {day:"Day 14",date:"2026-11-04",topic:"Subqueries 1: Non-Correlated",assignment:"10/10",other:"0/10"},
+ {day:"Day 15",date:"2026-11-06",topic:"Subqueries 2: Correlated + EXISTS",assignment:"10/10",other:"0/10"}
 ];
 let data;try{data=JSON.parse(localStorage.getItem("assignmentTracker_v1"))||initial}catch{data=initial}
 const parse=s=>{const m=String(s).trim().match(/^(\d+)\s*\/\s*(\d+)$/);if(!m)return null;const done=+m[1],total=+m[2];if(total<1||done>total)return null;return{done,total,left:total-done}};
